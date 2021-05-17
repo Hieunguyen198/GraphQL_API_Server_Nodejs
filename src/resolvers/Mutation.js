@@ -4,17 +4,17 @@ const { APP_SECRET, getUserId } = require('../utils')
 
 
 async function signup(parent, args, context, info) {
-    // 1
+    
     const password = await bcrypt.hash(args.password, 10)
   
-    // 2
+  
     const user = await context.prisma.user.create({ data: { ...args, password } })
   
-    // 3
+    
     const token = jwt.sign({ userId: user.id }, APP_SECRET)
 
     context.pubsub.publish("NEW_USER", user)
-    // 4
+    
     return {
       token,
       user,
@@ -22,13 +22,13 @@ async function signup(parent, args, context, info) {
   }
   
   async function login(parent, args, context, info) {
-    // 1
+    
     const user = await context.prisma.user.findUnique({ where: { email: args.email } })
     if (!user) {
       throw new Error('No such user found')
     }
   
-    // 2
+    
     const valid = await bcrypt.compare(args.password, user.password)
     if (!valid) {
       throw new Error('Invalid password')
@@ -36,7 +36,7 @@ async function signup(parent, args, context, info) {
   
     const token = jwt.sign({ userId: user.id }, APP_SECRET)
   
-    // 3
+    
     return {
       token,
       user,
@@ -59,10 +59,10 @@ async function signup(parent, args, context, info) {
   }
 
   async function vote(parent, args, context, info) {
-    // 1
+
     const userId = getUserId(context)
   
-    // 2
+    
     const vote = await context.prisma.vote.findUnique({
       where: {
         linkId_userId: {
@@ -76,7 +76,7 @@ async function signup(parent, args, context, info) {
       throw new Error(`Already voted for link: ${args.linkId}`)
     }
   
-    // 3
+    
     const newVote = context.prisma.vote.create({
       data: {
         user: { connect: { id: userId } },
@@ -88,9 +88,47 @@ async function signup(parent, args, context, info) {
     return newVote
   }
 
+  async function deleteuser(parent, args, context, info){
+    if(!args.id) return 'Id is null';
+    try {
+      await context.prisma.user.delete({where:{id: args.id}})
+      return 'Delete user success!'
+    } catch (error) {
+      return 'Id not found!'
+    }
+  }
+
+  async function updateuser(parent,args, context,info){
+    if(!args.id) return;
+    try {
+      const user = await context.prisma.user.update({
+        data:{
+          name: args.name,
+          email: args.email
+        },where: {id:args.id}})
+        return user
+    } catch (error) {
+      return 'Id not found!'
+    }
+    
+  }
+
+  async function deletelink(parent, args, context, info){
+    if(!args.id) return 'Id is null';
+    try {
+      await context.prisma.link.delete({where:{id: args.id}})
+      return 'Delete user success!'
+    } catch (error) {
+      return 'Id not found!'
+    }
+  }
+
   module.exports = {
     signup,
     login,
     post,
     vote,
+    updateuser,
+    deleteuser,
+    deletelink,
   }

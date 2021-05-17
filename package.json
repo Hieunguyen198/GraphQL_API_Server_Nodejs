@@ -20,6 +20,6 @@
   },
   "devDependencies": {
     "@prisma/cli": "^2.19.0",
-    "prisma": "^2.19.0"
+    "prisma": "^2.20.0"
   }
 }

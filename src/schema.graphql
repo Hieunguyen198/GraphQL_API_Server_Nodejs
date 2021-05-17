@@ -1,6 +1,6 @@
 type Query {
   info: String!
-  feed(filter: String, skip: Int, take: Int, orderBy: LinkOrderByInput): [Link!]!
+  feed(filter: String, skip: Int, take: Int, orderBy: LinkOrderByInput): Feed!
   user(filter: String): [User!]!
   vote(filter: String):[Vote!]!
 }
@@ -16,6 +16,9 @@ type Mutation {
   signup(email: String! password: String! name: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   vote(linkId: ID!): Vote
+  updateuser(name: String, email: String, id:Int!):User!
+  deleteuser(id:Int!): String
+  deletelink(id:Int!): String
 }
 
 type AuthPayload {
@@ -37,6 +40,7 @@ type Link {
   url: String!
   postedBy: User
   votes: [Vote!]!
+  createdAt: Date
 }
 
 type Subscription {
@@ -52,6 +56,7 @@ type Vote {
 }
 
 input LinkOrderByInput {
+  id:Sort
   description: Sort
   url: Sort
   createdAt: Sort
@@ -61,3 +66,4 @@ enum Sort {
   asc
   desc
 }
+scalar Date
